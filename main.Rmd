@@ -5,36 +5,100 @@ date: "2022-10-09"
 output: pdf_document
 ---
 
-When a variable has no effect in most groups, but has an effect in one group.
-Looks like no effect in the whole population
+When a variable has no effect in most groups, but has an effect in one group,
+it can look like no effect in the whole population.
 
-```{r setup}
+```{r libraries, include=FALSE}
 library(ggplot2)
 library(dplyr)
 ```
 
-```{r functions}
-noisy_line <- function(slope, intercept, n, group_label) {
+```{r functions, include=FALSE}
+noisy_line <- function(slope, intercept, n, Subgroup) {
   
   n = n - 1
   
   data.frame(x = 0:n / n * 10, eps = rnorm(n + 1, 0, 1)) %>%
     mutate(y = slope * x + intercept + eps,
-           group_label = group_label) -> df
+           Subgroup = Subgroup) -> df
   
   return(df)
   
 }
 ```
 
-```{r test}
-grp1 <- noisy_line(0, 3.5, 100, 'Low risk')
-grp2 <- noisy_line(0, 6.5, 100, 'Medium risk')
-grp3 <- noisy_line(1, 0, 20, 'High risk')
+```{r three-populations, include=FALSE}
+nlow = 100
+nmed = 100
+nhi = 20
+
+grp1 <- noisy_line(0, 3.5, nlow, 'Low risk')
+grp2 <- noisy_line(0, 6.5, nmed, 'Medium risk')
+grp3 <- noisy_line(1, 0, nhi, 'High risk')
 
 df <- rbind(grp1, grp2, grp3)
 
-qplot(df$x, df$y)
+```
+
+We will simulate a population made up of `r nlow` low-risk people, `r nmed`
+medium-risk people, and `r nhi` high-risk people. The outcome $y$ has some random
+variation. The exposure $x$ has no effect on $y$, *except* in the high-risk group,
+where it has a linear, positive effect.
+
+
+
+
+# Effect in whole population
+
+```{r non-obvious-plot, echo=FALSE}
+
+bad_lm <- lm(df$y ~ df$x)
+
+ggplot(df, aes(x=x, y=y)) +
+  geom_point() +
+  geom_abline(slope = bad_lm$coefficients[2], intercept = bad_lm$coefficients[1])
+
+summ = summary.lm(bad_lm)
 
 ```
 
+Fitted the following linear model $\hat{y} = \beta_1 x + \beta_0$:
+
+Slope = `r bad_lm$coefficients[2]`, $P=$ `r summ$coefficients[2,4]`
+
+Intercept = `r bad_lm$coefficients[1]`, $P=$ `r summ$coefficients[1,4]`
+
+$R^2=$ `r summ$r.squared` 
+
+It appears that $x$ has little to no effect on $y$ (unimpressive $P$ for the slope
+term, and unimpressive $R^2$).
+
+
+
+
+# Effect in high-risk population only
+
+```{r obvious-plot, echo=FALSE}
+df %>%
+  filter(Subgroup == 'High risk') -> hr
+
+my_lm <- lm(hr$y ~ hr$x)
+
+summ = summary.lm(my_lm)
+
+ggplot(df, aes(x=x, y=y)) +
+  geom_point(aes(color=Subgroup)) +
+  geom_abline(slope = my_lm$coefficients[2], intercept = my_lm$coefficients[1])
+
+```
+
+Fitted the following linear model $\hat{y} = \beta_1 x + \beta_0$:
+
+Slope = `r my_lm$coefficients[2]`, $P=$ `r summ$coefficients[2,4]`
+
+Intercept = `r my_lm$coefficients[1]`, $P=$ `r summ$coefficients[1,4]`
+
+$R^2=$ `r summ$r.squared` 
+
+If we separate the subgroups, we see that $x$ has a significant effect on $y$ in 
+one particular subgroup (low $P$ for the slope term, and high $R^2$).
