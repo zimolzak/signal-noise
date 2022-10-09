@@ -28,23 +28,15 @@ noisy_line <- function(slope, intercept, n, Subgroup) {
 }
 ```
 
-```{r three-populations, include=FALSE}
-
-
-```
-
-
-
 
 
 
 ## Settings
 
-Choose how you want your populations to look
+Choose how you want your populations to look.
 
-```{r eruptions, echo=FALSE}
+```{r inputs, echo=FALSE}
 inputPanel(
-
   sliderInput("nlow", label = "N of low-risk:",
               min = 50, max = 200, value = 100, step = 1),
   
@@ -53,46 +45,40 @@ inputPanel(
   
   sliderInput("nhi", label = "N of high-risk:",
               min = 10, max = 40, value = 20, step = 1)
-
 )
-
-
-
-
-make_rand_plot <- function(split_subgroups) {
-
-grp1 <- noisy_line(0, 3.5, input$nlow, 'Low risk')
-grp2 <- noisy_line(0, 6.5, input$nmed, 'Medium risk')
-grp3 <- noisy_line(1, 0, input$nhi, 'High risk')
-
-df <- rbind(grp1, grp2, grp3)
-
-if(split_subgroups) {
-  df %>% filter(Subgroup == 'High risk') -> subg
-  model <- lm(subg$y ~ subg$x)
-  myplot <- ggplot(df, aes(x=x, y=y)) +
-    geom_point(aes(color = Subgroup)) +
-    geom_abline(slope = model$coefficients[2], intercept = model$coefficients[1])
-}
-else {
-  model <- lm(df$y ~ df$x)
-  myplot <- ggplot(df, aes(x=x, y=y)) +
-    geom_point() +
-    geom_abline(slope = model$coefficients[2], intercept = model$coefficients[1])
-}
-
-
-return(myplot)
-
-}
-
-
-
-
-renderPlot({
-  make_rand_plot(split_subgroups = TRUE)
-})
-
 ```
 
 
+```{r function-plot, echo=FALSE}
+make_rand_plot <- function(split_subgroups) {
+  grp1 <- noisy_line(0, 3.5, input$nlow, 'Low risk')
+  grp2 <- noisy_line(0, 6.5, input$nmed, 'Medium risk')
+  grp3 <- noisy_line(1, 0, input$nhi, 'High risk')
+  
+  df <- rbind(grp1, grp2, grp3)
+  
+  if(split_subgroups) {
+    df %>% filter(Subgroup == 'High risk') -> subg
+    model <- lm(subg$y ~ subg$x)
+    myplot <- ggplot(df, aes(x=x, y=y)) +
+      geom_point(aes(color = Subgroup)) +
+      geom_abline(slope = model$coefficients[2], intercept = model$coefficients[1])
+  }
+  else {
+    model <- lm(df$y ~ df$x)
+    myplot <- ggplot(df, aes(x=x, y=y)) +
+      geom_point() +
+      geom_abline(slope = model$coefficients[2], intercept = model$coefficients[1])
+  }
+
+  return(myplot)
+}
+```
+
+
+
+```{r final, echo=FALSE}
+renderPlot({
+  make_rand_plot(split_subgroups = TRUE)
+})
+```
