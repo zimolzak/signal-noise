@@ -46,21 +46,28 @@ inputPanel(
   sliderInput("nmed", label = "N of medium-risk:",
               min = 50, max = 200, value = 100, step = 1),
   sliderInput("nhi", label = "N of high-risk:",
-              min = 10, max = 40, value = 20, step = 1),
+              min = 10, max = 40, value = 20, step = 1)
+)
+
+inputPanel(
   
   sliderInput("mlow", label = "Slope low-risk:",
               min = -0.1, max = 0.1, value = 0, step = 0.01),
   sliderInput("mmed", label = "Slope medium-risk:",
               min = -0.1, max = 0.1, value = 0, step = 0.01),
   sliderInput("mhi", label = "Slope high-risk:",
-              min = -1, max = 1, value = 1, step = 0.1),
+              min = -1, max = 1, value = 1, step = 0.1)
+)
+
+inputPanel(
+
 
   sliderInput("blow", label = "Intercept low-risk:",
-              min = 50, max = 200, value = 100, step = 1),
+              min = 0, max = 10, value = 3.5, step = 0.5),
   sliderInput("bmed", label = "Intercept medium-risk:",
-              min = 50, max = 200, value = 100, step = 1),
+              min = 0, max = 10, value = 6.5, step = 0.5),
   sliderInput("bhi", label = "Intercept high-risk:",
-              min = 10, max = 40, value = 20, step = 1)
+              min = 0, max = 10, value = 0, step = 0.5)
   
   
   
@@ -71,9 +78,9 @@ inputPanel(
 ```{r function-plot, echo=FALSE}
 make_rand_plot <- function(split_subgroups, return_what) {
   set.seed(42)
-  grp1 <- noisy_line(input$mlow, 3.5, input$nlow, 'Low risk')
-  grp2 <- noisy_line(input$mmed, 6.5, input$nmed, 'Medium risk')
-  grp3 <- noisy_line(input$mhi, 0, input$nhi, 'High risk')
+  grp1 <- noisy_line(input$mlow, input$blow, input$nlow, 'Low risk')
+  grp2 <- noisy_line(input$mmed, input$bmed, input$nmed, 'Medium risk')
+  grp3 <- noisy_line(input$mhi, input$bhi, input$nhi, 'High risk')
   
   df <- rbind(grp1, grp2, grp3)
   
@@ -117,6 +124,9 @@ make_rand_plot <- function(split_subgroups, return_what) {
 
 
 
+## All subgroups mixed
+
+
 ```{r final, echo=FALSE}
 renderPlot({
   cat('h')
@@ -136,6 +146,8 @@ $R^2$ = `r reactive({make_rand_plot(split_subgroups = FALSE, return_what = 'r')}
 
 
 
+
+## Only one subgroup
 
 ```{r final2, echo=FALSE}
 renderPlot({
