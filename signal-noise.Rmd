@@ -12,6 +12,7 @@ it can look like no effect in the whole population.
 ```{r libraries, include=FALSE}
 library(ggplot2)
 library(dplyr)
+library(shiny)
 ```
 
 ```{r functions, include=FALSE}
@@ -37,6 +38,9 @@ Choose how you want your populations to look.
 
 ```{r inputs, echo=FALSE}
 inputPanel(
+  # selectInput("do_subgroup", label = "Analyze high-risk only:",
+  #             choices = c(TRUE, FALSE), selected = FALSE),
+
   sliderInput("nlow", label = "N of low-risk:",
               min = 50, max = 200, value = 100, step = 1),
   
@@ -79,6 +83,13 @@ make_rand_plot <- function(split_subgroups) {
 
 ```{r final, echo=FALSE}
 renderPlot({
+  make_rand_plot(split_subgroups = FALSE)
+})
+
+renderPlot({
   make_rand_plot(split_subgroups = TRUE)
 })
+
 ```
+
+Testing `r reactive({input$nlow})` .
