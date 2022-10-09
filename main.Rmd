@@ -43,13 +43,14 @@ df <- rbind(grp1, grp2, grp3)
 
 We will simulate a population made up of `r nlow` low-risk people, `r nmed`
 medium-risk people, and `r nhi` high-risk people. The outcome $y$ has some random
-variation. The exposure $x$ has no effect on $y$, *except* in the high-risk group,
-where it has a linear, positive effect.
+variation. The data are constructed so that the exposure $x$ has no effect on $y$, *except* in the high-risk group, where it has a linear, positive effect.
 
 
 
 
-# Effect in whole population
+# Effect of $x$ in the *whole* population
+
+We will fit a simple model where $y = f(x)$, disregarding subgroups entirely.
 
 ```{r non-obvious-plot, echo=FALSE}
 
@@ -78,6 +79,8 @@ term, and unimpressive $R^2$).
 
 
 # Effect in high-risk population only
+
+We will fit a simple model but *only to one subgroup.*
 
 ```{r obvious-plot, echo=FALSE}
 df %>%
@@ -109,6 +112,10 @@ one particular subgroup (low $P$ for the slope term, and high $R^2$).
 
 # Simple model adjusting for risk level
 
+This will fit a multivariable (specifically two-variable) model to predict $y$ as a function of $x$ and subgroup both, *without* considering interaction between the two.
+
+This table shows regression coefficient estimates and $P$ values:
+
 ```{r more-models, echo=FALSE}
 mod2factor <- lm(data = df, y ~ x + Subgroup)
 modinter <- lm(data = df, y ~ x + Subgroup + (x * Subgroup))
@@ -121,12 +128,19 @@ sm2$coefficients[, c(1,4)] %>% as.table() %>% kable()
 
 $R^2 =$ `r sm2$r.squared`
 
-Interpretation:
+## Interpretation
 
-- Intercept: What is the best guess for $y$ (for the reference subgroup)?
-- x: What should we add to that, for each 1.0 increase in $x$? (Often not significant)
-- Subgroup 2: What should we add for points in subgroup 2?
-- Subgroup 3: What should we add for points in subgroup 3, the high-risk group? (Often significant for my default random data, because mean of group 1 $\approx 3.5$, mean of group 1 $\approx 6.5$, and mean of group 3 $\approx 5$.)
+Intercept:
+: What is the best guess for $y$ (for the reference subgroup)?
+
+x:
+: What should we add to that, for each 1.0 increase in $x$? (Often not significant)
+
+Subgroup 2:
+: What should we add for points in subgroup 2?
+
+Subgroup 3:
+: What should we add for points in subgroup 3, the high-risk group? (Often significant for my default random data, because mean of group 1 $\approx 3.5$, mean of group 1 $\approx 6.5$, and mean of group 3 $\approx 5$.)
 
 *Note:* The parameter for $x$ (the slope) is estimated the same for all subgroups.
 
@@ -134,6 +148,8 @@ Interpretation:
 
 
 # Model including exposure:risk interaction
+
+Finally, we fit a multivariable of $y$ as a function of $x$ and subgroup both, *plus* an interaction term. This should do approximately the same thing as fitting three separate one-variable models, one per each stratum, but now we are combining these into an "all-in-one" model.
 
 ```{r echo=FALSE}
 # smi$coefficients[, c(1,4)]  %>% as.data.frame() -> outdf
@@ -145,13 +161,24 @@ smi$coefficients[, c(1,4)] %>% as.table() %>% kable()
 
 $R^2 =$ `r smi$r.squared`
 
-# Interpretation
+## Interpretation
 
 First, is the $R^2$ better in the simple model or the interaction model?
 
-- Intercept: What is the best guess for $y$ (for the reference subgroup)?
-- x: What should we add to that, for each 1.0 increase in $x$ (In other words, the slope for the reference subgroup)?
-- Subgroup 2: What should we add (to intercept) for points in subgroup 2?
-- Subgroup 3: What should we add (to intercept) for points in subgroup 3, the high-risk group? (Interpret in context of the slope, below.)
-- x:Subgroup 2 interaction: Effect of changing group from 1 to 2 on the slope. (If significant, then group 2 has a different slope from group 1)
-- x:Subgroup 3 interaction: Effect of changing group from 1 to 3 on the slope. (If significant, then group 3 has a different slope from group 1)
+Intercept:
+: What is the best guess for $y$ (for the reference subgroup)?
+
+x:
+: What should we add to that, for each 1.0 increase in $x$ (In other words, the slope for the reference subgroup)?
+
+Subgroup 2:
+: What should we add (to intercept) for points in subgroup 2?
+
+Subgroup 3:
+: What should we add (to intercept) for points in subgroup 3, the high-risk group? (Interpret in context of the slope, below.)
+
+x:Subgroup 2 interaction:
+: Effect of changing group from 1 to 2 on the slope. (If significant, then group 2 has a different slope from group 1)
+
+x:Subgroup 3 interaction:
+: Effect of changing group from 1 to 3 on the slope. (If significant, then group 3 has a different slope from group 1)
