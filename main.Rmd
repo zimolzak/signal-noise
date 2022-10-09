@@ -11,6 +11,7 @@ it can look like no effect in the whole population.
 ```{r libraries, include=FALSE}
 library(ggplot2)
 library(dplyr)
+library(knitr)
 ```
 
 ```{r functions, include=FALSE}
@@ -32,9 +33,9 @@ nlow = 100
 nmed = 100
 nhi = 20
 
-grp1 <- noisy_line(0, 3.5, nlow, 'Low risk')
-grp2 <- noisy_line(0, 6.5, nmed, 'Medium risk')
-grp3 <- noisy_line(1, 0, nhi, 'High risk')
+grp1 <- noisy_line(0, 3.5, nlow, '1 (Low risk)')
+grp2 <- noisy_line(0, 6.5, nmed, '2 (Medium risk)')
+grp3 <- noisy_line(1, 0, nhi, '3 (High risk)')
 
 df <- rbind(grp1, grp2, grp3)
 
@@ -80,7 +81,7 @@ term, and unimpressive $R^2$).
 
 ```{r obvious-plot, echo=FALSE}
 df %>%
-  filter(Subgroup == 'High risk') -> hr
+  filter(Subgroup == '3 (High risk)') -> hr
 
 my_lm <- lm(hr$y ~ hr$x)
 
@@ -102,3 +103,37 @@ $R^2=$ `r summ$r.squared`
 
 If we separate the subgroups, we see that $x$ has a significant effect on $y$ in 
 one particular subgroup (low $P$ for the slope term, and high $R^2$).
+
+
+
+
+# Simple model adjusting for risk level
+
+```{r more-models, echo=FALSE}
+mod2factor <- lm(data = df, y ~ x + Subgroup)
+modinter <- lm(data = df, y ~ x + Subgroup + (x * Subgroup))
+
+sm2 <- summary.lm(mod2factor)
+smi <- summary.lm(modinter)
+
+sm2$coefficients[, c(1,4)] %>% as.table() %>% kable()
+
+
+
+
+```
+
+$R^2 =$ `r sm2$r.squared`
+
+# Model including exposure:risk interaction
+
+```{r echo=FALSE}
+# smi$coefficients[, c(1,4)]  %>% as.data.frame() -> outdf
+# hux(outdf) %>%
+#   add_rownames()
+
+smi$coefficients[, c(1,4)] %>% as.table() %>% kable()
+
+```
+
+$R^2 =$ `r smi$r.squared`
