@@ -54,7 +54,8 @@ inputPanel(
 
 
 ```{r function-plot, echo=FALSE}
-make_rand_plot <- function(split_subgroups) {
+make_rand_plot <- function(split_subgroups, return_what) {
+  set.seed(42)
   grp1 <- noisy_line(0, 3.5, input$nlow, 'Low risk')
   grp2 <- noisy_line(0, 6.5, input$nmed, 'Medium risk')
   grp3 <- noisy_line(1, 0, input$nhi, 'High risk')
@@ -74,8 +75,25 @@ make_rand_plot <- function(split_subgroups) {
       geom_point() +
       geom_abline(slope = model$coefficients[2], intercept = model$coefficients[1])
   }
+  
+  if(return_what == 'plot'){
+    return(myplot)
+  }
+  
+  
+  else if(return_what == 'm'){
+    return(model$coefficients[2])
+  }
+  else if(return_what == 'b'){
+    return(model$coefficients[1])
+  }
+  else if(return_what == 'r'){
+    summ = summary.lm(model)
+    return(summ$r.squared)
+  }
 
-  return(myplot)
+  
+  
 }
 ```
 
@@ -83,13 +101,22 @@ make_rand_plot <- function(split_subgroups) {
 
 ```{r final, echo=FALSE}
 renderPlot({
-  make_rand_plot(split_subgroups = FALSE)
+  cat('h')
+  make_rand_plot(split_subgroups = FALSE, return_what = 'plot')
 })
 
 renderPlot({
-  make_rand_plot(split_subgroups = TRUE)
+  make_rand_plot(split_subgroups = TRUE, return_what='plot')
 })
 
 ```
 
 Testing `r reactive({input$nlow})` .
+
+Fitted the following linear model $\hat{y} = \beta_1 x + \beta_0$:
+
+Slope = 0, $P=$
+
+intercept
+
+$R^2$
