@@ -117,13 +117,21 @@ sm2 <- summary.lm(mod2factor)
 smi <- summary.lm(modinter)
 
 sm2$coefficients[, c(1,4)] %>% as.table() %>% kable()
-
-
-
-
 ```
 
 $R^2 =$ `r sm2$r.squared`
+
+Interpretation:
+
+- Intercept: What is the best guess for $y$ (for the reference subgroup)?
+- x: What should we add to that, for each 1.0 increase in $x$? (Often not significant)
+- Subgroup 2: What should we add for points in subgroup 2?
+- Subgroup 3: What should we add for points in subgroup 3, the high-risk group? (Often significant for my default random data, because mean of group 1 $\approx 3.5$, mean of group 1 $\approx 6.5$, and mean of group 3 $\approx 5$.)
+
+*Note:* The parameter for $x$ (the slope) is estimated the same for all subgroups.
+
+
+
 
 # Model including exposure:risk interaction
 
@@ -133,7 +141,17 @@ $R^2 =$ `r sm2$r.squared`
 #   add_rownames()
 
 smi$coefficients[, c(1,4)] %>% as.table() %>% kable()
-
 ```
 
 $R^2 =$ `r smi$r.squared`
+
+# Interpretation
+
+First, is the $R^2$ better in the simple model or the interaction model?
+
+- Intercept: What is the best guess for $y$ (for the reference subgroup)?
+- x: What should we add to that, for each 1.0 increase in $x$ (In other words, the slope for the reference subgroup)?
+- Subgroup 2: What should we add (to intercept) for points in subgroup 2?
+- Subgroup 3: What should we add (to intercept) for points in subgroup 3, the high-risk group? (Interpret in context of the slope, below.)
+- x:Subgroup 2 interaction: Effect of changing group from 1 to 2 on the slope. (If significant, then group 2 has a different slope from group 1)
+- x:Subgroup 3 interaction: Effect of changing group from 1 to 3 on the slope. (If significant, then group 3 has a different slope from group 1)
