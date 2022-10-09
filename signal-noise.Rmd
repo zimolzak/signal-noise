@@ -1,59 +1,84 @@
 ---
-title: "Untitled"
+title: "Signal and Noise Subgroups"
 author: "Andrew Zimolzak"
 date: "2022-10-09"
 output: html_document
 runtime: shiny
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+When a variable has no effect in most groups, but has an effect in one group,
+it can look like no effect in the whole population.
+
+```{r libraries, include=FALSE}
+library(ggplot2)
+library(dplyr)
 ```
 
-This R Markdown document is made interactive using Shiny. Unlike the more traditional workflow of creating static reports, you can now create documents that allow your readers to change the assumptions underlying your analysis and see the results immediately. 
+```{r functions, include=FALSE}
+noisy_line <- function(slope, intercept, n, Subgroup) {
+  
+  n = n - 1
+  
+  data.frame(x = 0:n / n * 10, eps = rnorm(n + 1, 0, 1)) %>%
+    mutate(y = slope * x + intercept + eps,
+           Subgroup = Subgroup) -> df
+  
+  return(df)
+  
+}
+```
 
-To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html).
+```{r three-populations, include=FALSE}
 
-## Inputs and Outputs
 
-You can embed Shiny inputs and outputs in your document. Outputs are automatically updated whenever inputs change.  This demonstrates how a standard R plot can be made interactive by wrapping it in the Shiny `renderPlot` function. The `selectInput` and `sliderInput` functions create the input widgets used to drive the plot.
+```
+
+
+
+
+
+
+## Settings
+
+Choose how you want your populations to look
 
 ```{r eruptions, echo=FALSE}
 inputPanel(
-  selectInput("n_breaks", label = "Number of bins:",
-              choices = c(10, 20, 35, 50), selected = 20),
+
+  sliderInput("nlow", label = "N of low-risk:",
+              min = 50, max = 200, value = 100, step = 1),
   
-  sliderInput("bw_adjust", label = "Bandwidth adjustment:",
-              min = 0.2, max = 2, value = 1, step = 0.2)
+  sliderInput("nmed", label = "N of medium-risk:",
+              min = 50, max = 200, value = 100, step = 1),
+  
+  sliderInput("nhi", label = "N of high-risk:",
+              min = 10, max = 40, value = 20, step = 1)
+
 )
+
+
+make_rand_plot <- function() {
+
+grp1 <- noisy_line(0, 3.5, input$nlow, 'Low risk')
+grp2 <- noisy_line(0, 6.5, input$nmed, 'Medium risk')
+grp3 <- noisy_line(1, 0, input$nhi, 'High risk')
+
+df <- rbind(grp1, grp2, grp3)
+
+bad_lm <- lm(df$y ~ df$x)
+
+myplot <- ggplot(df, aes(x=x, y=y)) +
+  geom_point() +
+  geom_abline(slope = bad_lm$coefficients[2], intercept = bad_lm$coefficients[1])
+
+return(myplot)
+
+}
+
 
 renderPlot({
-  hist(faithful$eruptions, probability = TRUE, breaks = as.numeric(input$n_breaks),
-       xlab = "Duration (minutes)", main = "Geyser eruption duration")
-  
-  dens <- density(faithful$eruptions, adjust = input$bw_adjust)
-  lines(dens, col = "blue")
+  make_rand_plot()
 })
 ```
-
-## Embedded Application
-
-It's also possible to embed an entire Shiny application within an R Markdown document using the `shinyAppDir` function. This example embeds a Shiny application located in another directory:
-
-```{r tabsets, echo=FALSE}
-shinyAppDir(
-  system.file("examples/06_tabsets", package = "shiny"),
-  options = list(
-    width = "100%", height = 550
-  )
-)
-```
-
-Note the use of the `height` parameter to determine how much vertical space the embedded application should occupy.
-
-You can also use the `shinyApp` function to define an application inline rather then in an external directory.
-
-In all of R code chunks above the `echo = FALSE` attribute is used. This is to prevent the R code within the chunk from rendering in the document alongside the Shiny components.
-
 
 
