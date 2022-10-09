@@ -16,11 +16,11 @@ library(shiny)
 ```
 
 ```{r functions, include=FALSE}
-noisy_line <- function(slope, intercept, n, Subgroup) {
+noisy_line <- function(slope, intercept, n, Subgroup, noise=1) {
   
   n = n - 1
   
-  data.frame(x = 0:n / n * 10, eps = rnorm(n + 1, 0, 1)) %>%
+  data.frame(x = 0:n / n * 10, eps = rnorm(n + 1, 0, noise)) %>%
     mutate(y = slope * x + intercept + eps,
            Subgroup = Subgroup) -> df
   
@@ -65,15 +65,20 @@ inputPanel(
   sliderInput("bhi", label = "Intercept high-risk:",
               min = 0, max = 5, value = 0, step = 0.1)
 )
+
+inputPanel(
+  sliderInput("noise", label = "Noise:",
+              min = 0, max = 5, value = 1, step = 0.1)
+)
 ```
 
 
 ```{r function-plot, echo=FALSE}
 make_rand_plot <- function(split_subgroups = TRUE, return_what) {
   set.seed(42)
-  grp1 <- noisy_line(input$mlow, input$blow, input$nlow, '1 (Low risk)')
-  grp2 <- noisy_line(input$mmed, input$bmed, input$nmed, '2 (Medium risk)')
-  grp3 <- noisy_line(input$mhi, input$bhi, input$nhi, '3 (High risk)')
+  grp1 <- noisy_line(input$mlow, input$blow, input$nlow, '1 (Low risk)', input$noise)
+  grp2 <- noisy_line(input$mmed, input$bmed, input$nmed, '2 (Medium risk)', input$noise)
+  grp3 <- noisy_line(input$mhi, input$bhi, input$nhi, '3 (High risk)', input$noise)
   
   df <- rbind(grp1, grp2, grp3)
   
