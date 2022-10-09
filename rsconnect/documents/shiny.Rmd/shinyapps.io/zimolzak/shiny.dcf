@@ -1,0 +1,13 @@
+name: shiny
+title: shiny
+username:
+account: zimolzak
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 7254268
+bundleId: 6384323
+url: https://zimolzak.shinyapps.io/shiny/
+when: 1665310112.28949
+lastSyncTime: 1665310112.2895
+asMultiple: FALSE
+asStatic: FALSE
