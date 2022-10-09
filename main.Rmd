@@ -28,7 +28,11 @@ noisy_line <- function(slope, intercept, n, group_label) {
 ```
 
 ```{r test}
-df <- noisy_line(1, 1, 20, 'hi')
+grp1 <- noisy_line(0, 3.5, 100, 'Low risk')
+grp2 <- noisy_line(0, 6.5, 100, 'Medium risk')
+grp3 <- noisy_line(1, 0, 20, 'High risk')
+
+df <- rbind(grp1, grp2, grp3)
 
 qplot(df$x, df$y)
 
