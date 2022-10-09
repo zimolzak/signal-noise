@@ -1,0 +1,36 @@
+---
+title: "Signal and Noise Subgroups"
+author: "Andrew Zimolzak"
+date: "2022-10-09"
+output: pdf_document
+---
+
+When a variable has no effect in most groups, but has an effect in one group.
+Looks like no effect in the whole population
+
+```{r setup}
+library(ggplot2)
+library(dplyr)
+```
+
+```{r functions}
+noisy_line <- function(slope, intercept, n, group_label) {
+  
+  n = n - 1
+  
+  data.frame(x = 0:n / n * 10, eps = rnorm(n + 1, 0, 1)) %>%
+    mutate(y = slope * x + intercept + eps,
+           group_label = group_label) -> df
+  
+  return(df)
+  
+}
+```
+
+```{r test}
+df <- noisy_line(1, 1, 20, 'hi')
+
+qplot(df$x, df$y)
+
+```
+
