@@ -57,7 +57,9 @@ inputPanel(
 )
 
 
-make_rand_plot <- function() {
+
+
+make_rand_plot <- function(split_subgroups) {
 
 grp1 <- noisy_line(0, 3.5, input$nlow, 'Low risk')
 grp2 <- noisy_line(0, 6.5, input$nmed, 'Medium risk')
@@ -65,20 +67,32 @@ grp3 <- noisy_line(1, 0, input$nhi, 'High risk')
 
 df <- rbind(grp1, grp2, grp3)
 
-bad_lm <- lm(df$y ~ df$x)
+if(split_subgroups) {
+  df %>% filter(Subgroup == 'High risk') -> subg
+  model <- lm(subg$y ~ subg$x)
+  myplot <- ggplot(df, aes(x=x, y=y)) +
+    geom_point(aes(color = Subgroup)) +
+    geom_abline(slope = model$coefficients[2], intercept = model$coefficients[1])
+}
+else {
+  model <- lm(df$y ~ df$x)
+  myplot <- ggplot(df, aes(x=x, y=y)) +
+    geom_point() +
+    geom_abline(slope = model$coefficients[2], intercept = model$coefficients[1])
+}
 
-myplot <- ggplot(df, aes(x=x, y=y)) +
-  geom_point() +
-  geom_abline(slope = bad_lm$coefficients[2], intercept = bad_lm$coefficients[1])
 
 return(myplot)
 
 }
 
 
+
+
 renderPlot({
-  make_rand_plot()
+  make_rand_plot(split_subgroups = TRUE)
 })
+
 ```
 
 
