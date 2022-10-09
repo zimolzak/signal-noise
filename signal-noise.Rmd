@@ -13,6 +13,7 @@ it can look like no effect in the whole population.
 library(ggplot2)
 library(dplyr)
 library(shiny)
+library(knitr)
 ```
 
 ```{r functions, include=FALSE}
@@ -69,7 +70,7 @@ inputPanel(
 
 
 ```{r function-plot, echo=FALSE}
-make_rand_plot <- function(split_subgroups, return_what) {
+make_rand_plot <- function(split_subgroups = TRUE, return_what) {
   set.seed(42)
   grp1 <- noisy_line(input$mlow, input$blow, input$nlow, 'Low risk')
   grp2 <- noisy_line(input$mmed, input$bmed, input$nmed, 'Medium risk')
@@ -92,6 +93,16 @@ make_rand_plot <- function(split_subgroups, return_what) {
   }
   
   summ = summary.lm(model)
+  
+  # multivariable
+  mod2factor <- lm(data = df, y ~ x + Subgroup)
+  modinter <- lm(data = df, y ~ x + Subgroup + (x * Subgroup))
+
+  sm2 <- summary.lm(mod2factor)
+  smi <- summary.lm(modinter)
+
+  sm2$coefficients[, c(1,4)] %>% as.table() %>% kable() -> t2
+  smi$coefficients[, c(1,4)] %>% as.table() %>% kable() -> ti
 
   if(return_what == 'plot'){
     return(myplot)
@@ -110,6 +121,18 @@ make_rand_plot <- function(split_subgroups, return_what) {
   }
   else if(return_what == 'r'){
     return(summ$r.squared)
+  }
+  else if(return_what == 't2'){
+    return(t2)
+  }
+  else if(return_what == 'ti'){
+    return(ti)
+  }
+  else if(return_what == 'r2'){
+    return(sm2$r.squared)
+  }
+  else if(return_what == 'ri'){
+    return(smi$r.squared)
   }
 }
 ```
@@ -157,3 +180,68 @@ Intercept = `r reactive({make_rand_plot(split_subgroups = TRUE, return_what = 'b
 $P=$ `r reactive({make_rand_plot(split_subgroups = TRUE, return_what = 'pb')})`
 
 $R^2$ = `r reactive({make_rand_plot(split_subgroups = TRUE, return_what = 'r')})`
+
+
+
+
+
+
+## Simple model adjusting for risk level
+
+This will fit a multivariable (specifically two-variable) model to predict $y$ as a function of $x$ and subgroup both, *without* considering interaction between the two.
+
+This table shows regression coefficient estimates and $P$ values:
+
+`r reactive({make_rand_plot(return_what = 't2')})`
+
+$R^2 =$ `r reactive({make_rand_plot(return_what = 'r2')})`
+
+### Interpretation
+
+Intercept:
+: What is the best guess for $y$ (for the reference subgroup)?
+
+x:
+: What should we add to that, for each 1.0 increase in $x$? (Often not significant)
+
+Subgroup 2:
+: What should we add for points in subgroup 2?
+
+Subgroup 3:
+: What should we add for points in subgroup 3, the high-risk group? (Often significant for my default random data, because mean of group 1 $\approx 3.5$, mean of group 1 $\approx 6.5$, and mean of group 3 $\approx 5$.)
+
+*Note:* The parameter for $x$ (the slope) is estimated the same for all subgroups.
+
+## Model including exposure:risk interaction
+
+Finally, we fit a multivariable of $y$ as a function of $x$ and subgroup both, *plus* an interaction term. This should do approximately the same thing as fitting three separate one-variable models, one per each stratum, but now we are combining these into an "all-in-one" model.
+
+```{r echo=FALSE}
+
+```
+
+$R^2 =$ 0
+
+### Interpretation
+
+First, is the $R^2$ better in the simple model or the interaction model?
+
+Intercept:
+: What is the best guess for $y$ (for the reference subgroup)?
+
+x:
+: What shouldwe add to that, for each 1.0 increase in $x$ (In other words, the slope for the reference subgroup)?
+
+Subgroup 2:
+: What should we add (to intercept) for points in subgroup 2?
+
+Subgroup 3:
+: What should we add (to intercept) for points in subgroup 3, the high-risk group? (Interpret in context of the slope, below.)
+
+x:Subgroup 2 interaction:
+: Effect of changing group from 1 to 2 on the slope. (If significant, then group 2 has a different slope from group 1)
+
+x:Subgroup 3 interaction:
+: Effect of changing group from 1 to 3 on the slope. (If significant, then group 3 has a different slope from group 1)
+
+Note that this final $R^2$ is for the "whole" model, accounting for all 3 subgroups, so if it is not as "impressive" as the one-subgroup model $R^2$ above, it may be "diluted" by the other two subgroups.
