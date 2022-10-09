@@ -104,6 +104,10 @@ renderPlot({
   cat('h')
   make_rand_plot(split_subgroups = FALSE, return_what = 'plot')
 })
+```
+
+
+```{r final2, echo=FALSE}
 
 renderPlot({
   make_rand_plot(split_subgroups = TRUE, return_what='plot')
@@ -115,7 +119,7 @@ Testing `r reactive({input$nlow})` .
 
 Fitted the following linear model $\hat{y} = \beta_1 x + \beta_0$:
 
-Slope = 0, $P=$
+Slope = `r reactive({make_rand_plot(split_subgroups = FALSE, return_what = 'm')})`, $P=$
 
 intercept
 
