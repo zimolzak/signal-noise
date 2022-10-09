@@ -43,12 +43,27 @@ inputPanel(
 
   sliderInput("nlow", label = "N of low-risk:",
               min = 50, max = 200, value = 100, step = 1),
-  
   sliderInput("nmed", label = "N of medium-risk:",
               min = 50, max = 200, value = 100, step = 1),
-  
   sliderInput("nhi", label = "N of high-risk:",
+              min = 10, max = 40, value = 20, step = 1),
+  
+  sliderInput("mlow", label = "Slope low-risk:",
+              min = -0.1, max = 0.1, value = 0, step = 0.01),
+  sliderInput("mmed", label = "Slope medium-risk:",
+              min = -0.1, max = 0.1, value = 0, step = 0.01),
+  sliderInput("mhi", label = "Slope high-risk:",
+              min = -1, max = 1, value = 1, step = 0.1),
+
+  sliderInput("blow", label = "Intercept low-risk:",
+              min = 50, max = 200, value = 100, step = 1),
+  sliderInput("bmed", label = "Intercept medium-risk:",
+              min = 50, max = 200, value = 100, step = 1),
+  sliderInput("bhi", label = "Intercept high-risk:",
               min = 10, max = 40, value = 20, step = 1)
+  
+  
+  
 )
 ```
 
@@ -56,9 +71,9 @@ inputPanel(
 ```{r function-plot, echo=FALSE}
 make_rand_plot <- function(split_subgroups, return_what) {
   set.seed(42)
-  grp1 <- noisy_line(0, 3.5, input$nlow, 'Low risk')
-  grp2 <- noisy_line(0, 6.5, input$nmed, 'Medium risk')
-  grp3 <- noisy_line(1, 0, input$nhi, 'High risk')
+  grp1 <- noisy_line(input$mlow, 3.5, input$nlow, 'Low risk')
+  grp2 <- noisy_line(input$mmed, 6.5, input$nmed, 'Medium risk')
+  grp3 <- noisy_line(input$mhi, 0, input$nhi, 'High risk')
   
   df <- rbind(grp1, grp2, grp3)
   
