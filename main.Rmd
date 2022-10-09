@@ -182,3 +182,5 @@ x:Subgroup 2 interaction:
 
 x:Subgroup 3 interaction:
 : Effect of changing group from 1 to 3 on the slope. (If significant, then group 3 has a different slope from group 1)
+
+Note that this final $R^2$ is for the "whole" model, accounting for all 3 subgroups, so if it is not as "impressive" as the one-subgroup model $R^2$ above, it may be "diluted" by the other two subgroups.
