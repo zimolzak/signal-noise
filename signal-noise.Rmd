@@ -13,7 +13,6 @@ it can look like no effect in the whole population.
 library(ggplot2)
 library(dplyr)
 library(shiny)
-library(knitr)
 ```
 
 ```{r functions, include=FALSE}
@@ -101,8 +100,8 @@ make_rand_plot <- function(split_subgroups = TRUE, return_what) {
   sm2 <- summary.lm(mod2factor)
   smi <- summary.lm(modinter)
 
-  sm2$coefficients[, c(1,4)] %>% as.table() %>% kable() -> t2
-  smi$coefficients[, c(1,4)] %>% as.table() %>% kable() -> ti
+  sm2$coefficients[, c(1,4)] %>% as.table() -> t2
+  smi$coefficients[, c(1,4)] %>% as.table() -> ti
 
   if(return_what == 'plot'){
     return(myplot)
@@ -145,7 +144,6 @@ make_rand_plot <- function(split_subgroups = TRUE, return_what) {
 
 ```{r final, echo=FALSE}
 renderPlot({
-  cat('h')
   make_rand_plot(split_subgroups = FALSE, return_what = 'plot')
 })
 ```
@@ -192,7 +190,12 @@ This will fit a multivariable (specifically two-variable) model to predict $y$ a
 
 This table shows regression coefficient estimates and $P$ values:
 
-`r reactive({make_rand_plot(return_what = 't2')})`
+
+```{r echo=FALSE}
+reactive({
+  make_rand_plot(return_what = 't2')
+})
+```
 
 $R^2 =$ `r reactive({make_rand_plot(return_what = 'r2')})`
 
@@ -217,10 +220,13 @@ Subgroup 3:
 Finally, we fit a multivariable of $y$ as a function of $x$ and subgroup both, *plus* an interaction term. This should do approximately the same thing as fitting three separate one-variable models, one per each stratum, but now we are combining these into an "all-in-one" model.
 
 ```{r echo=FALSE}
+reactive({
+  make_rand_plot(return_what = 'ti')
+})
 
 ```
 
-$R^2 =$ 0
+$R^2 =$ `r reactive({make_rand_plot(return_what = 'ri')})`
 
 ### Interpretation
 
