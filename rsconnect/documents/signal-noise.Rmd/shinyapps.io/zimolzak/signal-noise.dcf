@@ -5,9 +5,9 @@ account: zimolzak
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 7254621
-bundleId: 6384520
+bundleId: 6385158
 url: https://zimolzak.shinyapps.io/signal-noise/
-when: 1665318047.14965
-lastSyncTime: 1665318047.14966
+when: 1665340221.69347
+lastSyncTime: 1665340221.69348
 asMultiple: FALSE
 asStatic: FALSE
